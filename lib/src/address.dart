@@ -129,6 +129,27 @@ class Address {
     return cashAddress;
   }
 
+  /// Converts legacy address to cash address
+  static String toSLPAddress(String legacyAddress, [bool includePrefix = true]) {
+    final decoded = Address._decodeLegacyAddress(legacyAddress);
+    String prefix = "";
+    if (includePrefix) {
+      switch (decoded["version"]) {
+        case Network.bchPublic :
+          prefix = "simpleledger";
+          break;
+        case Network.bchTestnetPublic :
+          prefix = "slptest";
+          break;
+        default:
+          throw FormatException("Unsupported address format: $legacyAddress");
+      }
+    }
+
+    final slpAddress = Address._encode(prefix, "P2PKH", decoded["hash"]);
+    return slpAddress;
+  }
+
   /// Converts cashAddr format to legacy address
   static String toLegacyAddress(String cashAddress) {
     final decoded = _decodeCashAddress(cashAddress);
